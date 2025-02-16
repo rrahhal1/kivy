@@ -32,7 +32,10 @@ jobs:
             libssl-dev \
             libffi-dev \
             libmysqlclient-dev \
-            cython
+            cython3
+
+      - name: Upgrade pip
+        run: pip3 install --upgrade pip
 
       - name: Install Android SDK
         run: |
