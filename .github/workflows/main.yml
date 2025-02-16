@@ -20,7 +20,9 @@ jobs:
           # Download and unzip command-line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
           unzip -q commandlinetools.zip -d $HOME/android-sdk
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+
+          # Move the unzipped folder to the expected location
+          mv $HOME/android-sdk/cmdline-tools-linux $HOME/android-sdk/cmdline-tools
 
           # Set up environment variables for SDK
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
@@ -65,4 +67,3 @@ jobs:
           key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-
-
