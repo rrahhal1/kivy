@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -19,32 +19,38 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'   # Ensuring we're using Python 3.10
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install -y openjdk-8-jdk unzip wget
         python -m pip install --upgrade pip
-        pip install kivy buildozer cython  # Added cython installation here
+        pip install kivy buildozer cython
 
     - name: Install Android SDK
       run: |
         mkdir -p $HOME/android-sdk
-        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O commandlinetools.zip
-        unzip commandlinetools.zip -d $HOME/android-sdk
-        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk --update
-        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "build-tools;30.0.3"
-        # Install android-30 (API 30) and other dependencies for Android development
-        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk "system-images;android-30;google_apis;x86_64" "platforms;android-30" "tools"
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+        unzip -q commandlinetools.zip -d $HOME/android-sdk
+        mv $HOME/android-sdk/cmdline-tools $HOME/android-sdk/latest
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        mv $HOME/android-sdk/latest $HOME/android-sdk/cmdline-tools/latest
+
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+
+        yes | sdkmanager --licenses
+        yes | sdkmanager --sdk_root=$ANDROID_HOME --update
+        yes | sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;33.0.2" "platforms;android-33" "ndk;25.2.9519653"
 
     - name: Build Android app with Buildozer
       run: |
         export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
 
-    - name: Upload APK to GitHub (optional)
+    - name: Upload APK to GitHub
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
