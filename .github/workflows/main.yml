@@ -47,6 +47,11 @@ jobs:
         sudo apt install -y git
         pip3 install --upgrade pip
 
+    - name: Install Cython
+      run: |
+        # Install Cython
+        pip3 install cython
+
     - name: Install Buildozer
       run: |
         # Install Buildozer and other required tools
