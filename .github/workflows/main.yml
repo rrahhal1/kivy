@@ -41,8 +41,14 @@ jobs:
           unzip commandlinetools-linux-7583922_latest.zip && \
           rm commandlinetools-linux-7583922_latest.zip
 
+      - name: Check SDK Manager path
+        run: |
+          ls -l /home/runner/android-sdk/cmdline-tools/bin/
+
       - name: Accept Android SDK licenses
-        run: yes | /home/runner/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+        run: |
+          chmod +x /home/runner/android-sdk/cmdline-tools/bin/sdkmanager && \
+          yes | /home/runner/android-sdk/cmdline-tools/bin/sdkmanager --licenses
 
       - name: Install Android SDK components
         run: |
