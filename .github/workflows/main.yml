@@ -23,15 +23,16 @@ jobs:
 
     - name: Create directory for Android SDK
       run: |
-        mkdir -p /home/runner/android-sdk/cmdline-tools
+        mkdir -p /home/runner/android-sdk/cmdline-tools/latest
 
     - name: Download and Install Android SDK Command-Line Tools
       run: |
         # Download cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
-        rm cmdline-tools.zip
-
+        
+        # Unzip the tools to the right location
+        unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools/latest
+        
         # List the SDK directory tree for debugging purposes
         echo "Listing entire SDK directory tree for debugging"
         ls -R /home/runner/android-sdk
