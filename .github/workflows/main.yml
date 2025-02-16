@@ -39,11 +39,12 @@ jobs:
           cd /home/runner/android-sdk/cmdline-tools && \
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip && \
           unzip commandlinetools-linux-7583922_latest.zip && \
-          rm commandlinetools-linux-7583922_latest.zip
+          rm commandlinetools-linux-7583922_latest.zip && \
+          mv cmdline-tools/* . && rmdir cmdline-tools
 
-      - name: Check SDK Manager path
+      - name: Verify SDK Manager
         run: |
-          ls -l /home/runner/android-sdk/cmdline-tools/bin/
+          ls -l /home/runner/android-sdk/cmdline-tools/
 
       - name: Accept Android SDK licenses
         run: |
