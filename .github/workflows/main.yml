@@ -60,19 +60,23 @@ jobs:
           # Install required components
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "build-tools;29.0.2" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
-      # Verify if AIDL is installed
-      - name: Check AIDL installation
+      # Check for the correct AIDL tool version
+      - name: Check AIDL availability
         run: |
+          echo "Checking AIDL in the build-tools directory..."
           if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
-            echo "AIDL is installed."
+            echo "AIDL is installed in build-tools/30.0.3."
+          elif [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
+            echo "AIDL is installed in build-tools/29.0.2."
           else
-            echo "AIDL is NOT installed."
+            echo "AIDL tool is not found!"
             exit 1
           fi
 
       # Check if AIDL command is available
-      - name: Check for AIDL command
+      - name: Check AIDL command
         run: |
+          echo "Checking if AIDL command is available..."
           if command -v aidl; then
             echo "AIDL command is available."
           else
