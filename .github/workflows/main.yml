@@ -28,20 +28,18 @@ jobs:
         # Ensure sdkmanager is executable
         chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
 
-        # Update SDK manager to get latest package list
+        # Update SDK manager to get the latest package list
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
 
-        # Accept licenses automatically
+        # Install required build-tools versions and platform tools
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3" "platform-tools"
+        
+        # Accept licenses for SDK packages
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
-        # Install required build-tools versions
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3"
-        # Install additional required SDK components
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "platform-tools"
-
+        
     - name: Install Dependencies
       run: |
-        # Update and install Buildozer dependencies
+        # Install required dependencies for Buildozer
         sudo apt update
         sudo apt install -y python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools
         sudo apt install -y git
