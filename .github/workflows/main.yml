@@ -35,11 +35,12 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          mkdir -p /home/runner/android-sdk/cmdline-tools/latest && \
-          cd /home/runner/android-sdk/cmdline-tools/latest && \
+          mkdir -p /home/runner/android-sdk/cmdline-tools && \
+          cd /home/runner/android-sdk/cmdline-tools && \
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip && \
           unzip commandlinetools-linux-7583922_latest.zip && \
-          rm commandlinetools-linux-7583922_latest.zip
+          rm commandlinetools-linux-7583922_latest.zip && \
+          mv cmdline-tools /home/runner/android-sdk/cmdline-tools/latest
 
       - name: Verify SDK Manager
         run: |
