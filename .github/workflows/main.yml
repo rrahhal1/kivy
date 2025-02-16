@@ -59,6 +59,10 @@ jobs:
         run: |
           /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
+      - name: Install additional Build Tools components
+        run: |
+          /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platforms;android-30" "tools" "extras;google;m2repository" "extras;android;m2repository"
+
       - name: Install Python packages
         run: pip3 install kivy buildozer
 
