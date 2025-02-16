@@ -59,7 +59,10 @@ jobs:
 
           # Install required components
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
-          
+
+          # Install AIDL if not already part of the build-tools package
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3"
+
       # Check if Build-tools are installed
       - name: Check Build-tools Installation
         run: |
