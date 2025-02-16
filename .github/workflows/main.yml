@@ -16,36 +16,34 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        api-level: 30
-        build-tools: 30.0.3
-
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y wget unzip openjdk-8-jdk
 
+    - name: Download and Install Android SDK Command-Line Tools
+      run: |
+        # Download and unzip cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip cmdline-tools.zip -d /usr/local/lib/android-sdk/cmdline-tools
+        rm cmdline-tools.zip
+        
+        # Set up the environment variables
+        echo "ANDROID_HOME=/usr/local/lib/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=/usr/local/lib/android-sdk" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
+
     - name: Install SDK components (including AIDL)
       run: |
-        # Update SDK manager
+        # Update SDK manager and install components
         yes | sdkmanager --update
-        # Install platform tools, build tools, cmdline-tools, and AIDL tools
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
         yes | sdkmanager "tools"
         yes | sdkmanager "extras;android;m2repository"
         yes | sdkmanager "extras;google;m2repository"
-
-    - name: Set ANDROID_HOME and PATH
-      run: |
-        # Set environment variables for Android SDK
-        echo "ANDROID_HOME=/usr/local/lib/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=/usr/local/lib/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
     - name: List installed SDK components for troubleshooting
       run: |
@@ -54,7 +52,7 @@ jobs:
     - name: List SDK directories for debugging AIDL location
       run: |
         echo "Listing directories in cmdline-tools"
-        ls $ANDROID_HOME/cmdline-tools/latest/bin
+        ls $ANDROID_HOME/cmdline-tools/tools/bin
         echo "Listing directories in platform-tools"
         ls $ANDROID_HOME/platform-tools
 
