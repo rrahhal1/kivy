@@ -31,6 +31,11 @@ jobs:
           sudo apt-get install -y libssl-dev libffi-dev python3-venv libncurses5-dev libstdc++6 libsqlite3-dev zlib1g-dev liblzma-dev
           sudo apt-get install -y python3-pyqt5 python3-scipy
 
+      # Install Cython
+      - name: Install Cython
+        run: |
+          pip install cython
+
       # Install Buildozer
       - name: Install Buildozer
         run: |
