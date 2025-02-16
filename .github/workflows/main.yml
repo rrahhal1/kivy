@@ -51,20 +51,19 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Update SDK and accept all licenses
-        echo "Updating SDK and accepting all licenses..."
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+        # Accept all SDK licenses
+        echo "Accepting SDK licenses..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-    - name: Install Android SDK Components
-      run: |
         # Install required SDK components and accept licenses for build-tools
+        echo "Installing Android SDK components..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
 
     - name: Verify Build-Tools Installation
       run: |
+        # Ensure the Build-tools are properly installed
         if [ ! -d "$ANDROID_HOME/build-tools/34.0.0" ]; then
-          echo "Error: Android Build-Tools not installed!"
+          echo "Error: Android Build-Tools 34.0.0 not installed!"
           exit 1
         fi
         echo "Build-tools installed successfully"
