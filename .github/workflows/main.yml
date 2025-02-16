@@ -58,23 +58,11 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
           # Install required components
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
-
-      # Check if Build-tools directory exists
-      - name: Verify Build-tools directory
-        run: |
-          if [ -d "$ANDROID_HOME/build-tools" ]; then
-            echo "Build-tools directory exists:"
-            ls -alh $ANDROID_HOME/build-tools/
-          else
-            echo "Build-tools directory not found!"
-            exit 1
-          fi
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "build-tools;29.0.2" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
       # Verify if AIDL is installed
       - name: Check AIDL installation
         run: |
-          echo "Checking if AIDL is installed"
           if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
             echo "AIDL is installed."
           else
