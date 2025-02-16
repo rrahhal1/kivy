@@ -28,8 +28,8 @@ jobs:
 
     - name: Download and Install Android SDK Command-Line Tools
       run: |
-        # Download the cmdline-tools package
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        # Download a different version of cmdline-tools to see if the issue persists
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline-tools.zip
         
         # Check if the download succeeded
         if [ $? -ne 0 ]; then
@@ -43,7 +43,7 @@ jobs:
         # Unzip the tools to the correct location
         unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools/latest
 
-        # Verify extraction
+        # Verify extraction and list SDK contents
         echo "Listing SDK contents after extraction"
         ls -R /home/runner/android-sdk/cmdline-tools/latest
 
@@ -57,7 +57,7 @@ jobs:
 
     - name: Verify sdkmanager installation
       run: |
-        # Check for sdkmanager directly by verifying its path
+        # Check if sdkmanager exists directly at the expected location
         if [ -f "/home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
           echo "sdkmanager found at /home/runner/android-sdk/cmdline-tools/latest/bin/"
         else
