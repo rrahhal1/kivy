@@ -32,10 +32,14 @@ jobs:
         unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
         rm cmdline-tools.zip
 
+        # List extracted files for debugging
+        echo "Listing extracted files"
+        ls -R /home/runner/android-sdk/cmdline-tools
+
         # Set environment variables
         echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
     - name: Check if sdkmanager is available in PATH
@@ -48,7 +52,7 @@ jobs:
       run: |
         # List the content of the SDK directory for further debugging
         echo "Listing directories in sdk-tools/bin"
-        ls $ANDROID_HOME/cmdline-tools/tools/bin
+        ls $ANDROID_HOME/cmdline-tools/latest/bin
 
     - name: Install SDK components (including AIDL)
       run: |
