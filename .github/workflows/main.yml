@@ -35,25 +35,24 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          mkdir -p /home/runner/android-sdk/cmdline-tools && \
-          cd /home/runner/android-sdk/cmdline-tools && \
+          mkdir -p /home/runner/android-sdk/cmdline-tools/latest && \
+          cd /home/runner/android-sdk/cmdline-tools/latest && \
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip && \
           unzip commandlinetools-linux-7583922_latest.zip && \
-          rm commandlinetools-linux-7583922_latest.zip && \
-          mv cmdline-tools/* . && rmdir cmdline-tools
+          rm commandlinetools-linux-7583922_latest.zip
 
       - name: Verify SDK Manager
         run: |
-          ls -l /home/runner/android-sdk/cmdline-tools/
+          ls -l /home/runner/android-sdk/cmdline-tools/latest/
 
       - name: Accept Android SDK licenses
         run: |
-          chmod +x /home/runner/android-sdk/cmdline-tools/bin/sdkmanager && \
-          yes | /home/runner/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+          chmod +x /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager && \
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Install Android SDK components
         run: |
-          /home/runner/android-sdk/cmdline-tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+          /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
       - name: Install Python packages
         run: pip3 install kivy buildozer
