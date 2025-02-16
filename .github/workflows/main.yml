@@ -62,9 +62,13 @@ jobs:
         echo "Listing available SDK packages..."
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
 
-        # Try installing specific build-tools versions
+        # Check if build-tools versions are available
+        echo "Checking for available build-tools versions..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep "build-tools"
+
+        # Attempt installing specific build-tools versions
         echo "Attempting to install build-tools 30.0.3, 29.0.2, and 28.0.3..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --verbose "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
 
     - name: Verify Build-Tools Installation
       run: |
