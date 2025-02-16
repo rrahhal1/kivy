@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: 3.10  # Ensure you use a supported version (3.10)
+        python-version: 3.10  # Replace with a supported version like 3.10 or 3.11
 
     - name: Install dependencies
       run: |
@@ -43,7 +43,7 @@ jobs:
         buildozer android debug
 
     - name: Upload APK to GitHub (optional)
-      uses: actions/upload-artifact@v4  # Ensure you use the latest version
+      uses: actions/upload-artifact@v4  # Ensure you use the latest version of this action
       with:
         name: android-apk
         path: ./bin/*.apk
