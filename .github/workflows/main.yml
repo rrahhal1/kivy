@@ -41,14 +41,19 @@ jobs:
         run: |
           pip install buildozer
 
-      # Install Android SDK and required components
+      # Install Android SDK and Build Tools
       - name: Install Android SDK and Build Tools
         run: |
+          # Create the necessary directory for the SDK
+          mkdir -p $HOME/Android/Sdk
+          
           # Install Android SDK Command Line Tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/Sdk
-          echo "y" | $HOME/Android/Sdk/tools/bin/sdkmanager --licenses
-          $HOME/Android/Sdk/tools/bin/sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-30"
+          
+          # Accept SDK licenses and install required tools
+          echo "y" | $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager --licenses
+          $HOME/Android/Sdk/cmdline-tools/bin/sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-30"
 
       # Build the APK
       - name: Build APK
