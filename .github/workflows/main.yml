@@ -42,8 +42,8 @@ jobs:
       run: |
         # Check if sdkmanager is available in the PATH
         echo "Checking if sdkmanager is available"
-        which sdkmanager
-
+        which sdkmanager || echo "sdkmanager not found"
+      
     - name: Install SDK components (including AIDL)
       run: |
         # Ensure sdkmanager is available and install components
