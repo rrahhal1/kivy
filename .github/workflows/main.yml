@@ -1,69 +1,55 @@
-name: Build Android App
+name: Build Kivy App with Buildozer
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Set up the Android SDK
-      - name: Set up Android SDK
+      - name: Set up Java JDK 8
+        run: sudo apt install -y openjdk-8-jdk
+
+      - name: Install dependencies
         run: |
-          # Download and unzip command-line tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
-          unzip -q commandlinetools.zip -d $HOME/android-sdk
+          sudo apt update && sudo apt install -y \
+            unzip \
+            wget \
+            curl \
+            git \
+            python3 \
+            python3-pip \
+            python3-dev \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            libmysqlclient-dev
 
-          # Move the unzipped folder to the expected location
-          mv $HOME/android-sdk/cmdline-tools-linux $HOME/android-sdk/cmdline-tools
-
-          # Set up environment variables for SDK
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-
-      # Install Android Build tools and accept licenses
-      - name: Install Android Build-Tools
+      - name: Install Android SDK
         run: |
-          # Install SDK Manager and accept licenses
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platform-tools" --verbose
+          mkdir -p /home/runner/android-sdk/cmdline-tools && \
+          cd /home/runner/android-sdk/cmdline-tools && \
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip && \
+          unzip commandlinetools-linux-7583922_latest.zip && \
+          rm commandlinetools-linux-7583922_latest.zip
 
-      # Verify Build Tools installation
-      - name: Verify Build Tools installation
+      - name: Accept Android SDK licenses
+        run: yes | /home/runner/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+
+      - name: Install Android SDK components
         run: |
-          ls -l $ANDROID_HOME/build-tools
+          /home/runner/android-sdk/cmdline-tools/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
-      # Set up Python environment and dependencies for buildozer
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+      - name: Install Python packages
+        run: pip3 install kivy buildozer
 
-      # Install Buildozer
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip
-          pip install buildozer
-
-      # Build the app with Buildozer
-      - name: Build the app with Buildozer
-        run: |
-          buildozer android debug
-          
-      # Cache Android SDK to speed up subsequent builds
-      - name: Cache Android SDK
-        uses: actions/cache@v2
-        with:
-          path: $HOME/android-sdk
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-
+      - name: Run Buildozer to build the app
+        run: buildozer android debug
