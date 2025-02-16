@@ -51,13 +51,11 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept all SDK licenses forcefully
+        # Accept all SDK licenses forcefully (attempt using multiple `yes` commands)
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --update || true
-
-        # Install stable build-tools and Aidl
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
-        
+
         # Ensure build-tools are installed
         ls -l $ANDROID_HOME/build-tools || { echo "Error: Build-tools not installed!"; exit 1; }
 
