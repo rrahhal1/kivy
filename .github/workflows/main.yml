@@ -11,16 +11,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Python
-      - name: Set up Python
+      # Set up Python 3.10
+      - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.10'
 
       # Install dependencies
       - name: Install dependencies
@@ -28,9 +29,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-pip python3-setuptools python3-dev build-essential git
           sudo apt-get install -y libssl-dev libffi-dev python3-venv libncurses5-dev libstdc++6 libsqlite3-dev zlib1g-dev liblzma-dev
-          sudo apt-get install -y python3-distutils  # Try installing distutils
-          
-          # Install additional dependencies for buildozer
           sudo apt-get install -y python3-pyqt5 python3-scipy
 
       # Install Buildozer
