@@ -32,7 +32,7 @@ jobs:
         unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
         rm cmdline-tools.zip
 
-        # List the full directory tree to see the structure
+        # List the SDK directory tree for debugging purposes
         echo "Listing entire SDK directory tree for debugging"
         ls -R /home/runner/android-sdk
 
@@ -44,29 +44,31 @@ jobs:
         echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
-    - name: Verify sdkmanager path
+    - name: Verify sdkmanager installation
       run: |
-        # Check if sdkmanager is found in the PATH
-        echo "Checking if sdkmanager exists at the expected path"
-        ls $ANDROID_HOME/cmdline-tools/latest/bin/
-        which sdkmanager || echo "sdkmanager not found"
-
-    - name: Install SDK components (including AIDL)
-      run: |
-        # Ensure sdkmanager is available and install components
-        if ! command -v sdkmanager > /dev/null 2>&1; then
-          echo "sdkmanager is not found, please check the installation."
+        # Verify sdkmanager directly without using PATH
+        if [ -f "/home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          echo "sdkmanager found at /home/runner/android-sdk/cmdline-tools/latest/bin/"
+        else
+          echo "sdkmanager not found in the expected location."
           exit 1
         fi
 
-        # Run sdkmanager and install required components
-        yes | sdkmanager --update
-        yes | sdkmanager "platforms;android-30"
-        yes | sdkmanager "build-tools;30.0.3"
-        yes | sdkmanager "cmdline-tools;latest"
-        yes | sdkmanager "tools"
-        yes | sdkmanager "extras;android;m2repository"
-        yes | sdkmanager "extras;google;m2repository"
+    - name: Install SDK components (including AIDL)
+      run: |
+        # If sdkmanager is found, proceed to install SDK components
+        if [ -f "/home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager --update
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-30"
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3"
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "cmdline-tools;latest"
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "tools"
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "extras;android;m2repository"
+          yes | /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "extras;google;m2repository"
+        else
+          echo "sdkmanager not found in the expected location. Exiting."
+          exit 1
+        fi
 
     - name: Check if AIDL is installed
       run: |
@@ -95,7 +97,6 @@ jobs:
 
     - name: Install required Android dependencies
       run: |
-        # Ensure the required SDK components are installed again
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
 
