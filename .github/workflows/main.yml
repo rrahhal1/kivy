@@ -51,7 +51,7 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept all SDK licenses
+        # Accept all SDK licenses including build-tools and ndk
         echo "Accepting SDK licenses..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
@@ -77,6 +77,12 @@ jobs:
 
         # Verify sdkmanager works
         sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
+
+        # Check for AIDL (Android Interface Definition Language) installation
+        if ! [ -x "$(command -v aidl)" ]; then
+          echo "AIDL is not installed, installing it now..."
+          sdkmanager "build-tools;34.0.0"
+        fi
 
         # Build APK
         buildozer android debug
