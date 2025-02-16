@@ -1,0 +1,43 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches:
+      - main # Trigger the action on push to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # Specify the Python version
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip python3-venv git build-essential libssl-dev libffi-dev python3-dev
+        sudo apt install -y cython ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev \
+          libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
+          libgstreamer1.0 libgstreamer-plugins-base1.0
+        pip install --upgrade cython pip setuptools wheel
+        pip install --user --upgrade buildozer
+
+    - name: Set up Buildozer environment
+      run: |
+        buildozer init  # Initializes buildozer.spec if not already created
+
+    - name: Build APK
+      run: |
+        buildozer -v android debug  # Build the APK
+
+    - name: Upload APK as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: myapp-apk
+        path: bin/myapp-0.1-arm64-v8a-debug.apk
