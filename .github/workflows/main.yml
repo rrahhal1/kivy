@@ -38,12 +38,18 @@ jobs:
         echo "PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
-    - name: Verify sdkmanager is available
+    - name: Check if sdkmanager is available in PATH
       run: |
         # Check if sdkmanager is available in the PATH
         echo "Checking if sdkmanager is available"
         which sdkmanager || echo "sdkmanager not found"
-      
+
+    - name: List SDK directory contents for troubleshooting
+      run: |
+        # List the content of the SDK directory for further debugging
+        echo "Listing directories in sdk-tools/bin"
+        ls $ANDROID_HOME/cmdline-tools/tools/bin
+
     - name: Install SDK components (including AIDL)
       run: |
         # Ensure sdkmanager is available and install components
@@ -67,8 +73,6 @@ jobs:
 
     - name: List SDK directories for debugging AIDL location
       run: |
-        echo "Listing directories in cmdline-tools"
-        ls $ANDROID_HOME/cmdline-tools/tools/bin
         echo "Listing directories in platform-tools"
         ls $ANDROID_HOME/platform-tools
 
