@@ -47,6 +47,8 @@ jobs:
     - name: Verify sdkmanager path
       run: |
         # Check if sdkmanager is found in the PATH
+        echo "Checking if sdkmanager exists at the expected path"
+        ls $ANDROID_HOME/cmdline-tools/latest/bin/
         which sdkmanager || echo "sdkmanager not found"
 
     - name: Install SDK components (including AIDL)
