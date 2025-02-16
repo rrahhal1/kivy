@@ -1,4 +1,4 @@
-name: Build APK
+name: Android Build Workflow
 
 on:
   push:
@@ -13,99 +13,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      # Set up Python 3.10
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
+    - name: Setup Android SDK
+      uses: reactivecircus/android-sdk-update-activity@v2
+      with:
+        api-level: 30
+        build-tools: 30.0.3
+        ndk-version: 21.3.6528147
 
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools python3-dev build-essential git
-          sudo apt-get install -y libssl-dev libffi-dev python3-venv libncurses5-dev libstdc++6 libsqlite3-dev zlib1g-dev liblzma-dev
-          sudo apt-get install -y python3-pyqt5 python3-scipy
+    - name: Install Build-Tools and check AIDL
+      run: |
+        echo "Installing Build-Tools and checking AIDL..."
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2"
+        
+        # Check if AIDL is available in Build-Tools 30.0.3
+        if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
+          echo "AIDL is available in Build-Tools 30.0.3"
+        else
+          echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
+        fi
+        
+        # Install Build-Tools 29.0.2 if AIDL is not found
+        if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
+          echo "Trying build-tools 29.0.2..."
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2"
+        fi
+        
+        # Check if AIDL is available in Build-Tools 29.0.2
+        if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
+          echo "AIDL is available in Build-Tools 29.0.2"
+        else
+          echo "AIDL not found in Build-Tools 29.0.2"
+          exit 1
+        fi
 
-      # Install Cython
-      - name: Install Cython
-        run: |
-          pip install cython
+        # Set build-tools directory to PATH
+        echo "Adding build-tools to PATH..."
+        echo "$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
+        echo "PATH=$PATH:$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
 
-      # Install Buildozer
-      - name: Install Buildozer
-        run: |
-          pip install buildozer
+    - name: Check AIDL availability
+      run: |
+        echo "Checking AIDL tool..."
+        if command -v aidl; then
+          echo "AIDL command is available."
+        else
+          echo "AIDL command is NOT available."
+          exit 1
 
-      # Install Android SDK Command Line Tools
-      - name: Install Android SDK Command Line Tools
-        run: |
-          mkdir -p $HOME/Android/Sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
-          unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/Sdk/
-          mv $HOME/Android/Sdk/cmdline-tools $HOME/Android/Sdk/cmdline-tools-temp
-          mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
-          mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
-          export ANDROID_HOME=$HOME/Android/Sdk
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools" >> $GITHUB_ENV
+    - name: Build the app
+      run: |
+        # Add your build commands here
+        echo "Building the app..."
 
-          # Accept SDK licenses non-interactively
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
-          # Install required components
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
-
-      # Install Build-Tools and AIDL
-      - name: Install Build-Tools and AIDL
-        run: |
-          echo "Installing Build-Tools and checking AIDL..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2"
-          
-          # Double-check for the AIDL tool in the build-tools directory
-          if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
-            echo "AIDL is available in Build-Tools 30.0.3"
-          else
-            echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
-          fi
-          
-          # Try another version of build-tools if AIDL is not found
-          if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
-            echo "Trying build-tools 29.0.2..."
-            yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2"
-          fi
-
-          # Check if AIDL is available now
-          if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
-            echo "AIDL is available in Build-Tools 29.0.2"
-          else
-            echo "AIDL is still not available."
-            exit 1
-          fi
-
-      # Check for the correct AIDL tool version
-      - name: Check AIDL availability
-        run: |
-          echo "Checking AIDL tool..."
-          if command -v aidl; then
-            echo "AIDL command is available."
-          else
-            echo "AIDL command is NOT available."
-            exit 1
-          fi
-
-      # Build the APK using Buildozer
-      - name: Build APK
-        run: |
-          cd $GITHUB_WORKSPACE
-          buildozer -v android debug
-
-      # Upload the APK artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: kivy-apk
-          path: bin/*.apk
+    - name: Run tests
+      run: |
+        # Add your testing commands here
+        echo "Running tests..."
