@@ -38,9 +38,16 @@ jobs:
         echo "PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
+    - name: Verify sdkmanager is available
+      run: |
+        # Check if sdkmanager is available in the PATH
+        echo "Checking if sdkmanager is available"
+        which sdkmanager
+
     - name: Install SDK components (including AIDL)
       run: |
-        # Update SDK manager and install components
+        # Ensure sdkmanager is available and install components
+        echo "Running sdkmanager"
         yes | sdkmanager --update
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
