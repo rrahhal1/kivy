@@ -31,13 +31,14 @@ jobs:
       run: |
         # Update SDK manager
         yes | sdkmanager --update
-        # Install platform tools, build tools, cmdline-tools, and AIDL
+        # Install platform tools, build tools, cmdline-tools, and AIDL tools
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
-        # Install AIDL explicitly
+        # Install additional tools and AIDL-specific packages if available
         yes | sdkmanager "extras;android;m2repository"
         yes | sdkmanager "extras;google;m2repository"
+        yes | sdkmanager "tools"
 
     - name: Set ANDROID_HOME and PATH
       run: |
