@@ -1,4 +1,4 @@
-name: Android Build Workflow
+name: Build APK with Buildozer
 
 on:
   push:
@@ -9,67 +9,45 @@ on:
       - main
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Setup Android SDK
-      uses: reactivecircus/android-sdk-update-activity@v1
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        api-level: 30
-        build-tools: 30.0.3
-        ndk-version: 21.3.6528147
+        python-version: '3.8'  # Or the version required by your Kivy project
 
-    - name: Install Build-Tools and checking AIDL...
+    - name: Install dependencies
       run: |
-        echo "Installing Build-Tools and checking AIDL..."
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2"
-        
-        # Check if AIDL is installed
-        if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
-          echo "AIDL is available in Build-Tools 30.0.3"
-        else
-          echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
-        fi
-        
-        # Try another version of build-tools if AIDL is not found
-        if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
-          echo "Trying build-tools 29.0.2..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2"
-        fi
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+        sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+        sudo apt-get install -y libjpeg-dev zlib1g-dev
+        sudo apt-get install -y git
+        sudo apt-get install -y liblzma-dev
+        sudo apt-get install -y libmysqlclient-dev
 
-        # Check if AIDL is available now
-        if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
-          echo "AIDL is available in Build-Tools 29.0.2"
-        else
-          echo "AIDL is still not available."
-          exit 1
-        fi
+        # Install Kivy and Buildozer
+        pip install kivy buildozer
 
-        # Add build-tools directory to PATH
-        echo "Adding build-tools directory to PATH..."
-        echo "$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-        echo "PATH=$PATH:$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-
-    - name: Check AIDL availability
+    - name: Install Android dependencies (optional if you need android SDK)
       run: |
-        echo "Checking AIDL tool..."
-        if command -v aidl; then
-          echo "AIDL command is available."
-        else
-          echo "AIDL command is NOT available."
-          exit 1
-          
-    - name: Build the app
-      run: |
-        # Add your build commands here
-        echo "Building the app..."
+        sudo apt-get install -y openjdk-8-jdk
+        yes | sdkmanager --update
+        yes | sdkmanager "platforms;android-30"
+        yes | sdkmanager "build-tools;30.0.3"
+        yes | sdkmanager "cmdline-tools;latest"
 
-    - name: Run tests
+    - name: Build APK
       run: |
-        # Add your testing commands here
-        echo "Running tests..."
+        buildozer android debug
 
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: apk
+        path: bin/*.apk
