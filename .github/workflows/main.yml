@@ -33,14 +33,11 @@ jobs:
         # Set up SDK directories
         export ANDROID_HOME=$HOME/android-sdk
         export ANDROID_SDK_ROOT=$ANDROID_HOME
-        mkdir -p $ANDROID_HOME/cmdline-tools
         mkdir -p $ANDROID_HOME/cmdline-tools/latest
 
         # Download and extract command-line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
         unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-
-        # Check extracted structure and move files correctly
         if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
         fi
@@ -54,10 +51,15 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept licenses and install stable build-tools version
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34" "ndk;25.2.9519653"
+        # Accept all SDK licenses forcefully
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --update || true
+
+        # Install stable build-tools and Aidl
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
+        
+        # Ensure build-tools are installed
+        ls -l $ANDROID_HOME/build-tools || { echo "Error: Build-tools not installed!"; exit 1; }
 
     - name: Build Android app with Buildozer
       run: |
@@ -68,6 +70,12 @@ jobs:
 
         # Verify sdkmanager works
         sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
+
+        # Verify Aidl and build-tools installation
+        if [ ! -d "$ANDROID_HOME/build-tools/34.0.0" ]; then
+          echo "Error: Android Build-Tools not installed!"
+          exit 1
+        fi
 
         # Build APK
         buildozer android debug
