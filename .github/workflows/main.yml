@@ -41,6 +41,17 @@ jobs:
         run: |
           pip install buildozer
 
+      # Install Android SDK
+      - name: Install Android SDK & Accept Licenses
+        run: |
+          echo y | sdkmanager --licenses
+          sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-30"
+
+      # Install missing dependencies (AIDL)
+      - name: Install AIDL
+        run: |
+          sdkmanager "build-tools;36.0.0" "platforms;android-30" "platform-tools"
+
       # Build the APK
       - name: Build APK
         run: |
