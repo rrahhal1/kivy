@@ -58,11 +58,10 @@ jobs:
           mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
           mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
 
-          # Accept Android SDK licenses explicitly
-          yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          # Accept Android SDK licenses manually
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
-          # Install required SDK components (including build tools and AIDL)
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --update
+          # Force install required SDK components (including build tools and AIDL)
           $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
       # Check if Build Tools are installed correctly
