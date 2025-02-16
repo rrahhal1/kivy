@@ -31,11 +31,18 @@ jobs:
       run: |
         # Update SDK manager
         yes | sdkmanager --update
-        # Install platform tools, build tools, cmdline-tools (which include AIDL)
+        # Install platform tools, build tools, and cmdline-tools (which include AIDL)
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
         
+    - name: Set ANDROID_HOME and PATH
+      run: |
+        # Set environment variables for Android SDK
+        echo "ANDROID_HOME=/usr/local/lib/android-sdk" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
+
     - name: Check if AIDL is installed
       run: |
         # Verify if AIDL tool is available
