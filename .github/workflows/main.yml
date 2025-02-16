@@ -54,27 +54,22 @@ jobs:
         # Accept all SDK licenses automatically with non-interactive prompt
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        # Check and install available SDK components
-        available_sdk_versions=$($ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep "build-tools;" | awk '{print $1}')
-        echo "Available Build-Tools versions: $available_sdk_versions"
+        # List available SDK versions
+        echo "Listing available SDK packages..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
 
-        # Install a known stable version if available
-        if [[ $available_sdk_versions == *"30.0.3"* ]]; then
-          echo "Installing build-tools;30.0.3"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
-        else
-          echo "Build-tools version 30.0.3 not found, installing default build-tools"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
-        fi
+        # Attempt installing stable version build-tools
+        echo "Installing known stable SDK components..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
 
     - name: Verify Build-Tools Installation
       run: |
         # Ensure the Build-tools are properly installed
-        if [ ! -d "$ANDROID_HOME/build-tools/30.0.3" ]; then
-          echo "Error: Android Build-Tools 30.0.3 not installed!"
+        if [ ! -d "$ANDROID_HOME/build-tools/29.0.2" ]; then
+          echo "Error: Android Build-Tools 29.0.2 not installed!"
           exit 1
         fi
-        echo "Build-tools 30.0.3 installed successfully"
+        echo "Build-tools 29.0.2 installed successfully"
 
     - name: Build Android app with Buildozer
       run: |
