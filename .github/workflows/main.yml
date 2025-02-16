@@ -45,7 +45,7 @@ jobs:
         # Ensure sdkmanager is executable
         chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager || ls -l $ANDROID_HOME/cmdline-tools/latest/bin/
 
-        # Export paths
+        # Export paths for Android SDK
         echo "export ANDROID_HOME=$HOME/android-sdk" >> ~/.bashrc
         echo "export ANDROID_SDK_ROOT=$ANDROID_HOME" >> ~/.bashrc
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
@@ -55,7 +55,7 @@ jobs:
         echo "Accepting SDK licenses..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        # Install only the required SDK components (using build-tools;34.0.0)
+        # Install required SDK components (using build-tools;34.0.0)
         echo "Installing Android SDK components..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
 
@@ -73,6 +73,8 @@ jobs:
         # Ensure AIDL is installed
         if ! [ -x "$(command -v aidl)" ]; then
           echo "AIDL not found, installing build-tools;34.0.0"
+          # Explicitly source the correct path for sdkmanager
+          source ~/.bashrc
           sdkmanager "build-tools;34.0.0"
         else
           echo "AIDL found!"
