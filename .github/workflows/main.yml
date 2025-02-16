@@ -21,21 +21,31 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y wget unzip openjdk-8-jdk
 
-    - name: Create directory for Android SDK
+    - name: Create necessary directories for Android SDK
       run: |
         mkdir -p /home/runner/android-sdk/cmdline-tools/latest
+        mkdir -p /home/runner/android-sdk/platform-tools
 
     - name: Download and Install Android SDK Command-Line Tools
       run: |
-        # Download cmdline-tools
+        # Download the cmdline-tools package
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         
-        # Unzip the tools to the right location
+        # Check if the download succeeded
+        if [ $? -ne 0 ]; then
+          echo "Download failed!"
+          exit 1
+        fi
+
+        # List contents of the zip file (for debugging)
+        unzip -l cmdline-tools.zip
+
+        # Unzip the tools to the correct location
         unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools/latest
-        
-        # List the SDK directory tree for debugging purposes
-        echo "Listing entire SDK directory tree for debugging"
-        ls -R /home/runner/android-sdk
+
+        # Verify extraction
+        echo "Listing SDK contents after extraction"
+        ls -R /home/runner/android-sdk/cmdline-tools/latest
 
     - name: Set environment variables for SDK
       run: |
@@ -47,7 +57,7 @@ jobs:
 
     - name: Verify sdkmanager installation
       run: |
-        # Verify sdkmanager directly without using PATH
+        # Check for sdkmanager directly by verifying its path
         if [ -f "/home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
           echo "sdkmanager found at /home/runner/android-sdk/cmdline-tools/latest/bin/"
         else
