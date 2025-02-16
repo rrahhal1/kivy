@@ -1,4 +1,4 @@
-name: Build APK with Buildozer
+name: Android SDK Setup, AIDL Check, and APK Build
 
 on:
   push:
@@ -9,45 +9,79 @@ on:
       - main
 
 jobs:
-  build-apk:
+  setup-android-sdk:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
       with:
-        python-version: '3.8'  # Or the version required by your Kivy project
+        api-level: 30
+        build-tools: 30.0.3
 
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-pip
-        sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
-        sudo apt-get install -y libjpeg-dev zlib1g-dev
-        sudo apt-get install -y git
-        sudo apt-get install -y liblzma-dev
-        sudo apt-get install -y libmysqlclient-dev
+        sudo apt-get install -y wget unzip openjdk-8-jdk
 
-        # Install Kivy and Buildozer
-        pip install kivy buildozer
-
-    - name: Install Android dependencies (optional if you need android SDK)
+    - name: Install SDK components (including AIDL)
       run: |
-        sudo apt-get install -y openjdk-8-jdk
+        # Update SDK manager
         yes | sdkmanager --update
+        # Install platform tools, build tools, and AIDL-specific tools
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
 
-    - name: Build APK
+    - name: Check if AIDL is installed
+      run: |
+        # Verify if AIDL tool is available
+        if command -v aidl > /dev/null 2>&1; then
+          echo "AIDL tool is installed."
+        else
+          echo "AIDL tool is not found."
+          exit 1
+        fi
+
+  build-apk:
+    runs-on: ubuntu-latest
+    needs: setup-android-sdk
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
+        pip install --upgrade pip
+        pip install buildozer
+
+    - name: Install required Android dependencies
+      run: |
+        yes | sdkmanager "platforms;android-30"
+        yes | sdkmanager "build-tools;30.0.3"
+
+    - name: Build APK with Buildozer
       run: |
         buildozer android debug
 
     - name: Upload APK artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: apk
-        path: bin/*.apk
+        name: apk-artifact
+        path: ./bin/*.apk
+
+  # Optional: Clean up
+  clean-up:
+    runs-on: ubuntu-latest
+    needs: build-apk
+
+    steps:
+    - name: Clean up
+      run: |
+        rm -rf ./bin
