@@ -16,45 +16,46 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Setup Android SDK
-      uses: reactivecircus/android-sdk-update-activity@v2
-      with:
-        api-level: 30
-        build-tools: 30.0.3
-        ndk-version: 21.3.6528147
-
-    - name: Install Build-Tools and check AIDL
+    - name: Install Android SDK and Build-Tools
       run: |
-        echo "Installing Build-Tools and checking AIDL..."
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2"
+        echo "Installing Android SDK and Build-Tools..."
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        # Download and install Android SDK Command Line Tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
+        unzip commandlinetools-linux-6858069_latest.zip -d $HOME/android-sdk
+        rm commandlinetools-linux-6858069_latest.zip
         
-        # Check if AIDL is available in Build-Tools 30.0.3
+        # Add Android SDK to PATH
+        echo "export ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
+        
+        # Install Build Tools and other SDK components
+        yes | sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;30.0.3" "build-tools;29.0.2" "platforms;android-30"
+        
+        # Install AIDL tools if available
+        echo "Checking AIDL availability..."
         if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
           echo "AIDL is available in Build-Tools 30.0.3"
         else
           echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
         fi
-        
-        # Install Build-Tools 29.0.2 if AIDL is not found
+
+        # If AIDL isn't found, try the other version
         if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
           echo "Trying build-tools 29.0.2..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2"
+          yes | sdkmanager --sdk_root=$ANDROID_HOME "build-tools;29.0.2"
         fi
-        
-        # Check if AIDL is available in Build-Tools 29.0.2
+
+        # Check if AIDL is now available
         if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
           echo "AIDL is available in Build-Tools 29.0.2"
         else
-          echo "AIDL not found in Build-Tools 29.0.2"
+          echo "AIDL is still not available."
           exit 1
         fi
 
-        # Set build-tools directory to PATH
-        echo "Adding build-tools to PATH..."
-        echo "$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-        echo "PATH=$PATH:$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
-
-    - name: Check AIDL availability
+    - name: Check AIDL tool
       run: |
         echo "Checking AIDL tool..."
         if command -v aidl; then
