@@ -1,99 +1,58 @@
-name: Build Kivy Android App
+name: Android Build Tools Setup with Buildozer
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
+  setup-build-tools-and-build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
+    - name: Set up Android SDK
       run: |
-        sudo apt update
-        sudo apt install -y openjdk-8-jdk unzip wget
-        python -m pip install --upgrade pip
-        pip install kivy buildozer cython
-
-    - name: Install Android SDK
-      run: |
-        # Set up SDK directories
+        # Set up Android SDK path
         export ANDROID_HOME=$HOME/android-sdk
         export ANDROID_SDK_ROOT=$ANDROID_HOME
         mkdir -p $ANDROID_HOME/cmdline-tools/latest
 
-        # Download and extract command-line tools
+        # Download command-line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
         unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-        if [ -d "$ANDROID_HOME/cmdline-tools/cmdline-tools" ]; then
-          mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
-        fi
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
 
         # Ensure sdkmanager is executable
         chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
 
-        # Export paths for Android SDK
-        echo "export ANDROID_HOME=$HOME/android-sdk" >> ~/.bashrc
-        echo "export ANDROID_SDK_ROOT=$ANDROID_HOME" >> ~/.bashrc
-        echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
-        source ~/.bashrc
-
-        # Ensure sdkmanager has the latest list of packages
-        echo "Updating SDK package list..."
+        # Update SDK manager to get latest package list
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
 
-        # Accept all SDK licenses automatically with non-interactive prompt
+        # Accept licenses automatically
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        # List available SDK packages and check for build-tools versions
-        echo "Listing available SDK packages..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
+        # Install required build-tools versions
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3"
+        # Install additional required SDK components
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "platform-tools"
 
-        # Check if build-tools versions are available
-        echo "Checking for available build-tools versions..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep "build-tools"
-
-        # Attempt installing specific build-tools versions
-        echo "Attempting to install build-tools 30.0.3, 29.0.2, and 28.0.3..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --verbose "build-tools;30.0.3" "build-tools;29.0.2" "build-tools;28.0.3" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
-
-    - name: Verify Build-Tools Installation
+    - name: Install Dependencies
       run: |
-        # Check if the correct Build-tools versions are installed
-        if [ ! -d "$ANDROID_HOME/build-tools/30.0.3" ] && [ ! -d "$ANDROID_HOME/build-tools/29.0.2" ] && [ ! -d "$ANDROID_HOME/build-tools/28.0.3" ]; then
-          echo "Error: Required Android Build-Tools not installed!"
-          exit 1
-        fi
-        echo "Required Build-tools installed successfully"
+        # Update and install Buildozer dependencies
+        sudo apt update
+        sudo apt install -y python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools
+        sudo apt install -y git
+        pip3 install --upgrade pip
 
-    - name: Build Android app with Buildozer
+    - name: Install Buildozer
       run: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export ANDROID_SDK_ROOT=$ANDROID_HOME
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
-        source ~/.bashrc
+        # Install Buildozer and other required tools
+        pip3 install buildozer
 
-        # Verify sdkmanager works
-        sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
-
-        # Build APK
+    - name: Build with Buildozer
+      run: |
+        # Build the Android app with Buildozer
         buildozer android debug
-
-    - name: Upload APK to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-apk
-        path: ./bin/*.apk
