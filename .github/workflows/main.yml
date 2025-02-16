@@ -51,20 +51,20 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept all SDK licenses automatically
+        # Accept all SDK licenses automatically with non-interactive prompt
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        # Install required SDK components (using build-tools;34.0.0)
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
+        # Install required SDK components (specifically build-tools version 36)
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" "platform-tools" "platforms;android-34" "ndk;25.2.9519653"
 
     - name: Verify Build-Tools Installation
       run: |
         # Ensure the Build-tools are properly installed
-        if [ ! -d "$ANDROID_HOME/build-tools/34.0.0" ]; then
-          echo "Error: Android Build-Tools 34.0.0 not installed!"
+        if [ ! -d "$ANDROID_HOME/build-tools/36.0.0" ]; then
+          echo "Error: Android Build-Tools 36.0.0 not installed!"
           exit 1
         fi
-        echo "Build-tools installed successfully"
+        echo "Build-tools 36.0.0 installed successfully"
 
     - name: Build Android app with Buildozer
       run: |
