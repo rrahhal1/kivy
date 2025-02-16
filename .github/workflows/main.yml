@@ -32,27 +32,22 @@ jobs:
         unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
         rm cmdline-tools.zip
 
-        # List extracted files for debugging
-        echo "Listing extracted files"
-        ls -R /home/runner/android-sdk/cmdline-tools
+        # List the full directory tree to see the structure
+        echo "Listing entire SDK directory tree for debugging"
+        ls -R /home/runner/android-sdk
 
+    - name: Set environment variables for SDK
+      run: |
         # Set environment variables
         echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
-    - name: Check if sdkmanager is available in PATH
+    - name: Verify sdkmanager path
       run: |
-        # Check if sdkmanager is available in the PATH
-        echo "Checking if sdkmanager is available"
+        # Check if sdkmanager is found in the PATH
         which sdkmanager || echo "sdkmanager not found"
-
-    - name: List SDK directory contents for troubleshooting
-      run: |
-        # List the content of the SDK directory for further debugging
-        echo "Listing directories in sdk-tools/bin"
-        ls $ANDROID_HOME/cmdline-tools/latest/bin
 
     - name: Install SDK components (including AIDL)
       run: |
@@ -70,15 +65,6 @@ jobs:
         yes | sdkmanager "tools"
         yes | sdkmanager "extras;android;m2repository"
         yes | sdkmanager "extras;google;m2repository"
-
-    - name: List installed SDK components for troubleshooting
-      run: |
-        sdkmanager --list
-
-    - name: List SDK directories for debugging AIDL location
-      run: |
-        echo "Listing directories in platform-tools"
-        ls $ANDROID_HOME/platform-tools
 
     - name: Check if AIDL is installed
       run: |
@@ -114,7 +100,7 @@ jobs:
     - name: Build APK with Buildozer
       run: |
         buildozer android debug
-        
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
