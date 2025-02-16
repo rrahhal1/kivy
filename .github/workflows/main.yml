@@ -58,19 +58,23 @@ jobs:
           mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
           mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
 
-          # Accept all licenses explicitly with yes command
-          yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          # Set ANDROID_HOME environment variable
+          echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools" >> $GITHUB_ENV
+
+          # Accept all licenses explicitly
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
           # Install required packages explicitly
-          yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
       # Check if Android SDK build-tools are present
       - name: Check Android SDK Build-Tools directory
         run: |
           # List the SDK directory to confirm if build-tools exist
-          if [ -d "$HOME/Android/Sdk/build-tools" ]; then
+          if [ -d "$ANDROID_HOME/build-tools" ]; then
             echo "Build-tools directory exists:"
-            ls -alh $HOME/Android/Sdk/build-tools/
+            ls -alh $ANDROID_HOME/build-tools/
           else
             echo "Build-tools directory not found!"
           fi
