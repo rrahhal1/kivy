@@ -35,10 +35,9 @@ jobs:
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
-        # Install additional tools and AIDL-specific packages if available
+        yes | sdkmanager "tools"
         yes | sdkmanager "extras;android;m2repository"
         yes | sdkmanager "extras;google;m2repository"
-        yes | sdkmanager "tools"
 
     - name: Set ANDROID_HOME and PATH
       run: |
@@ -50,8 +49,14 @@ jobs:
 
     - name: List installed SDK components for troubleshooting
       run: |
-        # List installed SDK components for troubleshooting
         sdkmanager --list
+
+    - name: List SDK directories for debugging AIDL location
+      run: |
+        echo "Listing directories in cmdline-tools"
+        ls $ANDROID_HOME/cmdline-tools/latest/bin
+        echo "Listing directories in platform-tools"
+        ls $ANDROID_HOME/platform-tools
 
     - name: Check if AIDL is installed
       run: |
