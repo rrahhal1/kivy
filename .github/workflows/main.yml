@@ -20,34 +20,33 @@ jobs:
       run: |
         echo "Installing Android SDK and Build-Tools..."
         sudo apt-get update
-        sudo apt-get install -y wget unzip
+        sudo apt-get install -y wget unzip openjdk-8-jdk
+
         # Download and install Android SDK Command Line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
         unzip commandlinetools-linux-6858069_latest.zip -d $HOME/android-sdk
         rm commandlinetools-linux-6858069_latest.zip
-        
-        # Add Android SDK to PATH
+
+        # Set environment variables for Android SDK
         echo "export ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
-        
-        # Install Build Tools and other SDK components
+
+        # Accept licenses and install necessary components
         yes | sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;30.0.3" "build-tools;29.0.2" "platforms;android-30"
-        
-        # Install AIDL tools if available
-        echo "Checking AIDL availability..."
+
+        # Check AIDL tool availability
+        echo "Checking AIDL tool..."
         if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
           echo "AIDL is available in Build-Tools 30.0.3"
         else
           echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
         fi
 
-        # If AIDL isn't found, try the other version
         if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
           echo "Trying build-tools 29.0.2..."
           yes | sdkmanager --sdk_root=$ANDROID_HOME "build-tools;29.0.2"
         fi
 
-        # Check if AIDL is now available
         if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
           echo "AIDL is available in Build-Tools 29.0.2"
         else
