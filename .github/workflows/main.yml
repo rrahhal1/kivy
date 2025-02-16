@@ -61,9 +61,9 @@ jobs:
           # Accept Android SDK licenses
           echo "y" | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
           
-          # Install required SDK components
+          # Install required SDK components (including build tools and AIDL)
           $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --update
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147"
 
       # Build the APK
       - name: Build APK
