@@ -58,9 +58,12 @@ jobs:
           mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
           mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
 
-          # Accept Android SDK licenses and install the required packages
+          # Accept Android SDK licenses
           echo "y" | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-30"
+          
+          # Install required SDK components
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --update
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
       # Build the APK
       - name: Build APK
