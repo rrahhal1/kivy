@@ -61,8 +61,8 @@ jobs:
           # Automatically accept licenses
           yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
-          # Install the necessary SDK components (including build tools and AIDL)
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
+          # Force install and accept licenses (use --no_https)
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
       # Check if Android SDK build-tools are present
       - name: Check Android SDK Build-Tools directory
