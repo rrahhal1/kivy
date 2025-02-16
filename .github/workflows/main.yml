@@ -21,19 +21,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y wget unzip openjdk-8-jdk
 
+    - name: Create directory for Android SDK
+      run: |
+        mkdir -p /home/runner/android-sdk/cmdline-tools
+        
     - name: Download and Install Android SDK Command-Line Tools
       run: |
-        # Ensure the directory exists before extracting cmdline-tools
-        mkdir -p /usr/local/lib/android-sdk/cmdline-tools
-        
         # Download and unzip cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d /usr/local/lib/android-sdk/cmdline-tools
+        unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
         rm cmdline-tools.zip
         
         # Set up the environment variables
-        echo "ANDROID_HOME=/usr/local/lib/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=/usr/local/lib/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
