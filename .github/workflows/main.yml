@@ -31,11 +31,11 @@ jobs:
       run: |
         # Update SDK manager
         yes | sdkmanager --update
-        # Install platform tools, build tools, and AIDL-specific tools
+        # Install platform tools, build tools, cmdline-tools (which include AIDL)
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
         yes | sdkmanager "cmdline-tools;latest"
-
+        
     - name: Check if AIDL is installed
       run: |
         # Verify if AIDL tool is available
@@ -63,13 +63,14 @@ jobs:
 
     - name: Install required Android dependencies
       run: |
+        # Ensure the required SDK components are installed again
         yes | sdkmanager "platforms;android-30"
         yes | sdkmanager "build-tools;30.0.3"
 
     - name: Build APK with Buildozer
       run: |
         buildozer android debug
-
+        
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
