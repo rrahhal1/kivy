@@ -23,12 +23,12 @@ jobs:
 
     - name: Create necessary directories for Android SDK
       run: |
-        mkdir -p /home/runner/android-sdk/cmdline-tools/latest
+        mkdir -p /home/runner/android-sdk/cmdline-tools
         mkdir -p /home/runner/android-sdk/platform-tools
 
-    - name: Download and Install Android SDK Command-Line Tools
+    - name: Download Android SDK Command-Line Tools
       run: |
-        # Download a different version of cmdline-tools to see if the issue persists
+        # Download a known version of the SDK command-line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline-tools.zip
         
         # Check if the download succeeded
@@ -37,19 +37,17 @@ jobs:
           exit 1
         fi
 
-        # List contents of the zip file (for debugging)
-        unzip -l cmdline-tools.zip
+        # Unzip the file into the correct directory
+        unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools
 
-        # Unzip the tools to the correct location
-        unzip cmdline-tools.zip -d /home/runner/android-sdk/cmdline-tools/latest
-
-        # Verify extraction and list SDK contents
-        echo "Listing SDK contents after extraction"
-        ls -R /home/runner/android-sdk/cmdline-tools/latest
+    - name: List SDK directory for debugging
+      run: |
+        # List the contents of the extracted SDK to verify sdkmanager location
+        ls -R /home/runner/android-sdk/cmdline-tools/
 
     - name: Set environment variables for SDK
       run: |
-        # Set environment variables
+        # Set environment variables for the SDK
         echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
         echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
