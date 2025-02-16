@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -58,17 +57,33 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
           # Install required components
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "build-tools;29.0.2" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
 
-      # Install Android SDK Build-Tools
+      # Install Build-Tools and AIDL
       - name: Install Build-Tools and AIDL
         run: |
-          echo "Installing Build-Tools and AIDL..."
+          echo "Installing Build-Tools and checking AIDL..."
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "build-tools;29.0.2"
+          
+          # Double-check for the AIDL tool in the build-tools directory
           if [ -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
             echo "AIDL is available in Build-Tools 30.0.3"
           else
-            echo "AIDL not found in Build-Tools 30.0.3"
+            echo "AIDL not found in Build-Tools 30.0.3, checking other versions"
+          fi
+          
+          # Try another version of build-tools if AIDL is not found
+          if [ ! -f "$ANDROID_HOME/build-tools/30.0.3/aidl" ]; then
+            echo "Trying build-tools 29.0.2..."
+            yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;29.0.2"
+          fi
+
+          # Check if AIDL is available now
+          if [ -f "$ANDROID_HOME/build-tools/29.0.2/aidl" ]; then
+            echo "AIDL is available in Build-Tools 29.0.2"
+          else
+            echo "AIDL is still not available."
+            exit 1
           fi
 
       # Check for the correct AIDL tool version
