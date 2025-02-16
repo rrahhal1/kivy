@@ -32,12 +32,12 @@ jobs:
       run: |
         # Set up SDK directories
         export ANDROID_HOME=$HOME/android-sdk
-        mkdir -p $ANDROID_HOME
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
-        unzip -q commandlinetools.zip -d $ANDROID_HOME
         mkdir -p $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/cmdline-tools $ANDROID_HOME/latest
-        mv $ANDROID_HOME/latest $ANDROID_HOME/cmdline-tools/latest
+        mkdir -p $ANDROID_HOME/cmdline-tools/latest
+
+        # Download and extract command-line tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+        unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools/latest
 
         # Export paths
         export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
