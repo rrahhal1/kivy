@@ -44,48 +44,50 @@ jobs:
       # Install Android SDK Command Line Tools
       - name: Install Android SDK Command Line Tools
         run: |
-          # Create necessary directory for Android SDK
           mkdir -p $HOME/Android/Sdk
-
-          # Download command line tools zip
           wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
-
-          # Unzip the command line tools into the correct directory
           unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android/Sdk/
-
-          # Move cmdline-tools to a specific folder structure
           mv $HOME/Android/Sdk/cmdline-tools $HOME/Android/Sdk/cmdline-tools-temp
           mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
           mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
-
-          # Set ANDROID_HOME environment variable
-          echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+          export ANDROID_HOME=$HOME/Android/Sdk
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
           echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools" >> $GITHUB_ENV
 
-          # Accept all licenses explicitly
+          # Accept SDK licenses non-interactively
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-          # Install required packages explicitly
+          # Install required components
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "system-images;android-30;google_apis;x86_64"
-
-      # Check if Android SDK build-tools are present
-      - name: Check Android SDK Build-Tools directory
+          
+      # Check if Build-tools are installed
+      - name: Check Build-tools Installation
         run: |
-          # List the SDK directory to confirm if build-tools exist
           if [ -d "$ANDROID_HOME/build-tools" ]; then
             echo "Build-tools directory exists:"
             ls -alh $ANDROID_HOME/build-tools/
           else
             echo "Build-tools directory not found!"
+            exit 1
           fi
 
-      # Build the APK
+      # Check if AIDL is available
+      - name: Check for AIDL
+        run: |
+          if command -v aidl; then
+            echo "AIDL is installed"
+          else
+            echo "AIDL is not installed"
+            exit 1
+          fi
+
+      # Build the APK using Buildozer
       - name: Build APK
         run: |
-          cd $GITHUB_WORKSPACE  # Ensure we are in the correct directory
+          cd $GITHUB_WORKSPACE
           buildozer -v android debug
 
-      # Upload the APK as an artifact
+      # Upload the APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
