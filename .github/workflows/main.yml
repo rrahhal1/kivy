@@ -31,7 +31,8 @@ jobs:
             build-essential \
             libssl-dev \
             libffi-dev \
-            libmysqlclient-dev
+            libmysqlclient-dev \
+            cython
 
       - name: Install Android SDK
         run: |
