@@ -63,7 +63,9 @@ jobs:
           
           # Install required SDK components (including build tools and AIDL)
           $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --update
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147"
+          
+          # Explicitly install build tools (30.0.3)
+          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;google;m2repository" "extras;android;m2repository" "tools" "ndk;21.3.6528147" "build-tools;30.0.3" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
       # Build the APK
       - name: Build APK
