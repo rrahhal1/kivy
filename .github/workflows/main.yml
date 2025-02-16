@@ -34,9 +34,6 @@ jobs:
             libmysqlclient-dev \
             cython3
 
-      - name: Upgrade pip
-        run: pip3 install --upgrade pip
-
       - name: Install Android SDK
         run: |
           mkdir -p /home/runner/android-sdk/cmdline-tools && \
@@ -45,6 +42,9 @@ jobs:
           unzip commandlinetools-linux-7583922_latest.zip && \
           rm commandlinetools-linux-7583922_latest.zip && \
           mv cmdline-tools /home/runner/android-sdk/cmdline-tools/latest
+
+      - name: Set Android SDK path
+        run: echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
 
       - name: Verify SDK Manager
         run: |
@@ -59,9 +59,9 @@ jobs:
         run: |
           /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
 
-      - name: Install additional Build Tools components
+      - name: Install additional Android tools (including Aidl)
         run: |
-          /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platforms;android-30" "tools" "extras;google;m2repository" "extras;android;m2repository"
+          /home/runner/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platforms;android-30" "tools" "extras;google;m2repository" "extras;android;m2repository" "ndk;21.4.7075529"
 
       - name: Install Python packages
         run: pip3 install kivy buildozer
