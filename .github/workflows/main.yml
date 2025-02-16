@@ -51,11 +51,11 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept all SDK licenses including build-tools and ndk
+        # Accept all SDK licenses
         echo "Accepting SDK licenses..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        # Install required SDK components and accept licenses for build-tools
+        # Install only the required SDK components (using build-tools;34.0.0)
         echo "Installing Android SDK components..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
 
@@ -67,6 +67,16 @@ jobs:
           exit 1
         fi
         echo "Build-tools installed successfully"
+
+    - name: Verify AIDL Installation
+      run: |
+        # Ensure AIDL is installed
+        if ! [ -x "$(command -v aidl)" ]; then
+          echo "AIDL not found, installing build-tools;34.0.0"
+          sdkmanager "build-tools;34.0.0"
+        else
+          echo "AIDL found!"
+        fi
 
     - name: Build Android app with Buildozer
       run: |
