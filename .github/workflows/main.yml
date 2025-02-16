@@ -1,46 +1,100 @@
-name: CI
+name: Build Kivy Android App
+
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 1,15 * *'
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # used to cache dependencies with a timeout
-      - name: Get Date
-        id: get-date
-        run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
-        shell: bash
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v2
-        with:
-          path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y openjdk-8-jdk unzip wget
+        python -m pip install --upgrade pip
+        pip install kivy buildozer cython
 
-      - uses: actions/cache@v2
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+    - name: Install Android SDK
+      run: |
+        # Set up SDK directories
+        export ANDROID_HOME=$HOME/android-sdk
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        mkdir -p $ANDROID_HOME/cmdline-tools/latest
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: master
+        # Download and extract command-line tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+        unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+        # Export paths
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+        echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
+        source ~/.bashrc
+
+        # Accept licenses and install stable build-tools version
+        yes | sdkmanager --licenses
+        yes | sdkmanager --sdk_root=$ANDROID_HOME --update
+        yes | sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;34.0.0" "platforms;android-34" "ndk;25.2.9519653"
+
+    - name: Build Android app with Buildozer
+      run: |
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+
+        #!/bin/bash
+
+        # Set Android SDK path
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH
+        
+        # Create necessary directories
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        mkdir -p $ANDROID_HOME/build-tools
+        
+        # Download and install command-line tools
+        echo "Downloading Android command-line tools..."
+        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
+        
+        # Unzip and move files
+        unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools/
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+        
+        # Verify sdkmanager installation
+        echo "Verifying sdkmanager installation..."
+        sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
+        
+        # Accept licenses
+        echo "Accepting SDK licenses..."
+        yes | sdkmanager --licenses
+        
+        # Install required Android build tools
+        echo "Installing required Android build tools..."
+        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
+        
+        # Verify that the build tools were installed
+        ls -l $ANDROID_HOME/build-tools || { echo "Error: Build tools not installed!"; exit 1; }
+        
+        # Continue with your Buildozer build process
+
+        buildozer android debug
+
+    - name: Upload APK to GitHub
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: ./bin/*.apk
