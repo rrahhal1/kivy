@@ -43,7 +43,7 @@ jobs:
         fi
 
         # Ensure sdkmanager is executable
-        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager || ls -l $ANDROID_HOME/cmdline-tools/latest/bin/
+        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
 
         # Export paths for Android SDK
         echo "export ANDROID_HOME=$HOME/android-sdk" >> ~/.bashrc
@@ -68,18 +68,6 @@ jobs:
         fi
         echo "Build-tools installed successfully"
 
-    - name: Verify AIDL Installation
-      run: |
-        # Ensure AIDL is installed
-        if ! [ -x "$(command -v aidl)" ]; then
-          echo "AIDL not found, installing build-tools;34.0.0"
-          # Explicitly source the correct path for sdkmanager
-          source ~/.bashrc
-          sdkmanager "build-tools;34.0.0"
-        else
-          echo "AIDL found!"
-        fi
-
     - name: Build Android app with Buildozer
       run: |
         export ANDROID_HOME=$HOME/android-sdk
@@ -89,12 +77,6 @@ jobs:
 
         # Verify sdkmanager works
         sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
-
-        # Check for AIDL (Android Interface Definition Language) installation
-        if ! [ -x "$(command -v aidl)" ]; then
-          echo "AIDL is not installed, installing it now..."
-          sdkmanager "build-tools;34.0.0"
-        fi
 
         # Build APK
         buildozer android debug
