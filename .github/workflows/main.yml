@@ -51,17 +51,22 @@ jobs:
         echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> ~/.bashrc
         source ~/.bashrc
 
-        # Accept all SDK licenses forcefully
+        # Accept SDK licenses
         echo "Accepting SDK licenses..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --update || true
 
-        # Install required SDK packages
-        echo "Installing SDK components..."
+    - name: Install Android SDK Components
+      run: |
+        echo "Installing Android SDK components..."
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --no_https "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
 
-        # Ensure build-tools are installed
-        ls -l $ANDROID_HOME/build-tools || { echo "Error: Build-tools not installed!"; exit 1; }
+    - name: Verify Build-Tools Installation
+      run: |
+        if [ ! -d "$ANDROID_HOME/build-tools/34.0.0" ]; then
+          echo "Error: Android Build-Tools not installed!"
+          exit 1
+        fi
+        echo "Build-tools installed successfully"
 
     - name: Build Android app with Buildozer
       run: |
@@ -72,12 +77,6 @@ jobs:
 
         # Verify sdkmanager works
         sdkmanager --version || { echo "Error: sdkmanager not found!"; exit 1; }
-
-        # Verify Aidl and build-tools installation
-        if [ ! -d "$ANDROID_HOME/build-tools/34.0.0" ]; then
-          echo "Error: Android Build-Tools not installed!"
-          exit 1
-        fi
 
         # Build APK
         buildozer android debug
