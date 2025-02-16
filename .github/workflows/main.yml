@@ -1,4 +1,4 @@
-name: Android Build Tools Setup with Buildozer
+name: Build Android App
 
 on:
   push:
@@ -6,60 +6,63 @@ on:
       - main
 
 jobs:
-  setup-build-tools-and-build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Android SDK
-      run: |
-        # Set up Android SDK path
-        export ANDROID_HOME=$HOME/android-sdk
-        export ANDROID_SDK_ROOT=$ANDROID_HOME
-        mkdir -p $ANDROID_HOME/cmdline-tools/latest
+      # Set up the Android SDK
+      - name: Set up Android SDK
+        run: |
+          # Download and unzip command-line tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
+          unzip -q commandlinetools.zip -d $HOME/android-sdk
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
 
-        # Download command-line tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O commandlinetools.zip
-        unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
+          # Set up environment variables for SDK
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/30.0.3" >> $GITHUB_ENV
 
-        # Ensure sdkmanager is executable
-        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+      # Install Android Build tools and accept licenses
+      - name: Install Android Build-Tools
+        run: |
+          # Install SDK Manager and accept licenses
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platform-tools" --verbose
 
-        # Update SDK manager to get the latest package list
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+      # Verify Build Tools installation
+      - name: Verify Build Tools installation
+        run: |
+          ls -l $ANDROID_HOME/build-tools
 
-        # Install a stable build-tools version (use 30.0.3 if possible)
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" "platform-tools"
+      # Set up Python environment and dependencies for buildozer
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-        
-        # Accept all licenses explicitly
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+      # Install Buildozer
+      - name: Install Buildozer
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer
 
-        # Ensure build-tools directory is installed
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;30.0.3"
+      # Build the app with Buildozer
+      - name: Build the app with Buildozer
+        run: |
+          buildozer android debug
+          
+      # Cache Android SDK to speed up subsequent builds
+      - name: Cache Android SDK
+        uses: actions/cache@v2
+        with:
+          path: $HOME/android-sdk
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
 
-    - name: Install Dependencies
-      run: |
-        # Install required dependencies for Buildozer
-        sudo apt update
-        sudo apt install -y python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools
-        sudo apt install -y git
-        pip3 install --upgrade pip
-
-    - name: Install Cython
-      run: |
-        # Install Cython
-        pip3 install cython
-
-    - name: Install Buildozer
-      run: |
-        # Install Buildozer and other required tools
-        pip3 install buildozer
-
-    - name: Build with Buildozer
-      run: |
-        # Build the Android app with Buildozer
-        buildozer android debug
