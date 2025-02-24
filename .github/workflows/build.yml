@@ -29,17 +29,30 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython pillow plyer
 
+    - name: Set up Android SDK
+      run: |
+        # Install SDK tools
+        echo "Setting up Android SDK..."
+        mkdir -p $HOME/android-sdk
+        cd $HOME/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+        unzip commandlinetools-linux-7302050_latest.zip
+        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+        
+        # Install required Android SDK components
+        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
+        
+        # Set ANDROID_HOME environment variable
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
     - name: Build Kivy app using Buildozer
       run: |
         if [ ! -f buildozer.spec ]; then
           buildozer init  # Only initialize if the file does not exist
         fi
-        # Install stable Android SDK components
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
-        
         # Build the APK
-        buildozer -v android debug  # You can change to "release" if needed
+        buildozer -v android debug  # Change to "release" if needed
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v4  # ✅ Updated to v4
