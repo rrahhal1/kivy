@@ -40,18 +40,19 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
         unzip commandlinetools-linux-7302050_latest.zip
         
-        # Move the extracted cmdline-tools folder to the expected directory structure
-        mv cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-        
+        # Ensure the structure is correct and move cmdline-tools to the right location
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        mv cmdline-tools/* $HOME/android-sdk/cmdline-tools/
+
         # Accept SDK licenses
-        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
         
         # Install required Android SDK components
-        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
+        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
         
         # Set ANDROID_HOME environment variable
         echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$HOME/android-sdk/cmdline-tools/bin" >> $GITHUB_PATH
 
     - name: Build Kivy app using Buildozer
       run: |
