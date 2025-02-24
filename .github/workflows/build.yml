@@ -36,15 +36,9 @@ jobs:
         mkdir -p $HOME/android-sdk
         cd $HOME/android-sdk
         
-        # Delete any previous cmdline-tools to avoid conflicts
-        rm -rf cmdline-tools
-        
         # Download and extract the command-line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
         unzip commandlinetools-linux-7302050_latest.zip
-        
-        # Move the extracted files into the correct directory
-        mv cmdline-tools $HOME/android-sdk/cmdline-tools
         
         # Accept SDK licenses
         yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
