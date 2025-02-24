@@ -1,0 +1,46 @@
+name: Build Kivy App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8  # or any version that works with your project
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-dev build-essential
+        python -m pip install --upgrade pip
+        pip install buildozer
+        pip install cython  # to prevent Cython-related errors
+        pip install pillow plyer zlib
+    
+    - name: Build Kivy app using Buildozer
+      run: |
+        buildozer init  # initialize Buildozer if not already done
+        buildozer -v android debug  # Adjust as needed for your specific platform (android, ios)
+    
+    - name: Upload build artifact (optional)
+      uses: actions/upload-artifact@v2
+      with:
+        name: android-debug-apk
+        path: bin/*.apk  # Or your desired output directory and file type
+    
+    - name: Clean up (optional)
+      run: |
+        rm -rf ~/.buildozer  # Clean up buildozer's cache
