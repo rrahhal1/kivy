@@ -460,7 +460,10 @@ requirements = python3,kivy==2.2.1,pillow,plyer,android,cython==0.29.33,zlib
 source.include_exts = py,png,jpg,kv,ttf,pdf,spec
 android.permissions = INTERNET
 
-android.sdk_path = /home/runner/.buildozer/android/platform/android-sdk
+android.sdk_path = ~/.android/sdk
+android.accept_sdk_license = True
+android.add_aars = libs/*.aar
+android.add_jars = libs/*.jar
 
 ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager "build-tools;31.0.0"
 
