@@ -24,11 +24,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-dev build-essential
+        sudo apt-get install -y python3-dev build-essential zlib1g-dev liblzma-dev  # ✅ Install zlib system package
         python -m pip install --upgrade pip
         pip install buildozer
         pip install cython  # to prevent Cython-related errors
-        pip install pillow plyer zlib
+        pip install pillow plyer  # ✅ Removed zlib from pip install
     
     - name: Build Kivy app using Buildozer
       run: |
