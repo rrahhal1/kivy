@@ -35,12 +35,19 @@ jobs:
         echo "Setting up Android SDK..."
         mkdir -p $HOME/android-sdk
         cd $HOME/android-sdk
+        
+        # Download and extract the command-line tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
         unzip commandlinetools-linux-7302050_latest.zip
-        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+        
+        # Move the tools into the correct directory
+        mv cmdline-tools $HOME/android-sdk/cmdline-tools
+        
+        # Accept SDK licenses
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         
         # Install required Android SDK components
-        yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
         
         # Set ANDROID_HOME environment variable
         echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
