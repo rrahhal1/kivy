@@ -32,8 +32,10 @@ jobs:
     
     - name: Build Kivy app using Buildozer
       run: |
-        buildozer init  # initialize Buildozer if not already done
-        buildozer -v android debug  # Adjust as needed for your specific platform (android, ios)
+         if [ ! -f buildozer.spec ]; then
+          buildozer init  # Only initialize if the file does not exist
+          fi
+          buildozer -v android debug  # Adjust as needed for your specific platform
     
     - name: Upload build artifact (optional)
       uses: actions/upload-artifact@v4
