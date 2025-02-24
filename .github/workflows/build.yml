@@ -40,10 +40,10 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
         unzip commandlinetools-linux-7302050_latest.zip
         
-        # Ensure the structure is correct and move cmdline-tools to the right location
+        # Ensure the structure is correct and extract directly into the correct folder
         mkdir -p $HOME/android-sdk/cmdline-tools
-        mv cmdline-tools/* $HOME/android-sdk/cmdline-tools/
-
+        cp -r cmdline-tools/* $HOME/android-sdk/cmdline-tools/
+        
         # Accept SDK licenses
         yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
         
