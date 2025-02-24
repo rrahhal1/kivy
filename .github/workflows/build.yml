@@ -15,10 +15,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4  # Updated to latest version
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v4  # Updated to latest version
       with:
         python-version: "3.10"  # Use latest stable version compatible with Kivy
     
@@ -42,7 +42,7 @@ jobs:
         buildozer -v android debug  # You can change to "release" if needed
     
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  # ✅ Updated to v4
       with:
         name: android-debug-apk
         path: bin/*.apk
