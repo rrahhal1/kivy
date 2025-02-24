@@ -1,6 +1,11 @@
 
 {pkgs}: {
   deps = [
+    pkgs.nano
+    pkgs.autoconf271
+    pkgs.unzipNLS
+    pkgs.wget
+    pkgs.splat
     pkgs.pkg-config
     pkgs.zlib
     pkgs.zlib.dev

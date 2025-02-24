@@ -1,5 +1,10 @@
 [app]
 
+include_dirs = ~/workspace/zlib
+
+link_libraries = zlib
+
+
 # (str) Title of your application
 title = Calculator App
 
@@ -119,7 +124,8 @@ fullscreen = 0
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+#android.ndk_path = /mnt/cacache/nix/store/r5ga3j4vixl5jk6whkhm39p3w1a695h1-qtcreator-5.0.3/share/qtcreator/qbs/share/qbs/modules/Android/ndk
+
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path =
@@ -450,6 +456,30 @@ warn_on_root = 1
 #    Then, invoke the command line with the "demo" profile:
 #
 #buildozer --profile demo android debug
-requirements = python3,kivy==2.2.1,pillow,plyer,android,cython==0.29.33
+requirements = python3,kivy==2.2.1,pillow,plyer,android,cython==0.29.33,zlib
 source.include_exts = py,png,jpg,kv,ttf,pdf,spec
 android.permissions = INTERNET
+
+android.sdk_path = /home/runner/.buildozer/android/platform/android-sdk
+
+~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager "build-tools;31.0.0"
+
+
+
+
+p4a.extra_args = --arch=arm64-v8a --arch=armeabi-v7a --requirements=zlib
+
+
+[requirements]
+# Include zlib explicitly
+zlib
+
+
+[android]
+use_p4a = True
+
+# In buildozer.spec, under the [android] section
+android.library_path = /mnt/nixmodules/nix/store/1cpycz2gjynsiqgj3195jgrvbk1s4y1w-zlib-1.3.1-dev/lib
+android.include_path = /mnt/nixmodules/nix/store/1cpycz2gjynsiqgj3195jgrvbk1s4y1w-zlib-1.3.1-dev/include
+buildozer android update
+
