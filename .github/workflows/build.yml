@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
@@ -14,39 +15,34 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.8  # or any version that works with your project
+        python-version: "3.10"  # Use latest stable version compatible with Kivy
     
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-dev build-essential zlib1g-dev liblzma-dev  # ✅ Install zlib system package
+        sudo apt-get install -y python3-dev build-essential zlib1g-dev liblzma-dev openjdk-17-jdk
         python -m pip install --upgrade pip
-        pip install buildozer
-        pip install cython  # to prevent Cython-related errors
-        pip install pillow plyer  # ✅ Removed zlib from pip install
-    
+        pip install buildozer cython pillow plyer
+
     - name: Build Kivy app using Buildozer
       run: |
-         if [ ! -f buildozer.spec ]; then
+        if [ ! -f buildozer.spec ]; then
           buildozer init  # Only initialize if the file does not exist
-          fi
-          # Ensure required Android SDK components are installed
-          
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;36.0.0-rc5" "platform-tools" "platforms;android-34"
-          buildozer -v android debug  # Adjust as needed for your specific platform
+        fi
+        # Install stable Android SDK components
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-34"
+        
+        # Build the APK
+        buildozer -v android debug  # You can change to "release" if needed
     
-    - name: Upload build artifact (optional)
-      uses: actions/upload-artifact@v4
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
       with:
         name: android-debug-apk
-        path: bin/*.apk  # Or your desired output directory and file type
-    
-    - name: Clean up (optional)
-      run: |
-        rm -rf ~/.buildozer  # Clean up buildozer's cache
+        path: bin/*.apk
